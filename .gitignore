@@ -1,5 +1,11 @@
 # Data
-/data/
+# /data/
+# Ignorar todo bajo data por defecto…
+/data/*
+
+# …excepto los marcadores y metadatos de DVC
+!/data/**/.gitkeep
+!/data/**/*.dvc
 
 # Mac OS-specific storage files
 .DS_Store
