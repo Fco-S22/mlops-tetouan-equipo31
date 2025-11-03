@@ -1,29 +1,14 @@
 from pathlib import Path
+import pandas as pd
 
-from loguru import logger
-from tqdm import tqdm
-import typer
+class DataLoader:
+    """
+    Cargador genérico de datasets CSV.
+    """
+    def __init__(self, data_path: str):
+        self.data_path = Path(data_path)
 
-from mlops_consumo_energia_tetouan.config import PROCESSED_DATA_DIR, RAW_DATA_DIR
-
-app = typer.Typer()
-
-
-@app.command()
-def main(
-    # ---- REPLACE DEFAULT PATHS AS APPROPRIATE ----
-    input_path: Path = RAW_DATA_DIR / "dataset.csv",
-    output_path: Path = PROCESSED_DATA_DIR / "dataset.csv",
-    # ----------------------------------------------
-):
-    # ---- REPLACE THIS WITH YOUR OWN CODE ----
-    logger.info("Processing dataset...")
-    for i in tqdm(range(10), total=10):
-        if i == 5:
-            logger.info("Something happened for iteration 5.")
-    logger.success("Processing dataset complete.")
-    # -----------------------------------------
-
-
-if __name__ == "__main__":
-    app()
+    def load(self) -> pd.DataFrame:
+        df = pd.read_csv(self.data_path)
+        print(f"[INFO] Cargado {self.data_path} -> {df.shape[0]} filas x {df.shape[1]} columnas")
+        return df

@@ -1,29 +1,35 @@
-from pathlib import Path
+from typing import Tuple
+import pandas as pd
+from sklearn.model_selection import train_test_split
+from sklearn.compose import ColumnTransformer
+from sklearn.preprocessing import StandardScaler, OneHotEncoder
 
-from loguru import logger
-from tqdm import tqdm
-import typer
+class FeatureEngineer:
+    """
+    Separa X/y y arma un preprocesador automático:
+    - Numéricas: StandardScaler
+    - Categóricas: OneHotEncoder(handle_unknown="ignore")
+    """
+    def __init__(self, target_col: str, test_size: float = 0.2, random_state: int = 42):
+        self.target_col = target_col
+        self.test_size = test_size
+        self.random_state = random_state
+        self.preprocessor = None
 
-from mlops_consumo_energia_tetouan.config import PROCESSED_DATA_DIR
+    def split(self, df: pd.DataFrame) -> Tuple[pd.DataFrame, pd.DataFrame, pd.Series, pd.Series]:
+        X = df.drop(columns=[self.target_col])
+        y = df[self.target_col]
+        return train_test_split(X, y, test_size=self.test_size, random_state=self.random_state)
 
-app = typer.Typer()
+    def build_preprocessor(self, X: pd.DataFrame) -> ColumnTransformer:
+        num_cols = X.select_dtypes(include=["number"]).columns.tolist()
+        cat_cols = X.select_dtypes(exclude=["number"]).columns.tolist()
 
-
-@app.command()
-def main(
-    # ---- REPLACE DEFAULT PATHS AS APPROPRIATE ----
-    input_path: Path = PROCESSED_DATA_DIR / "dataset.csv",
-    output_path: Path = PROCESSED_DATA_DIR / "features.csv",
-    # -----------------------------------------
-):
-    # ---- REPLACE THIS WITH YOUR OWN CODE ----
-    logger.info("Generating features from dataset...")
-    for i in tqdm(range(10), total=10):
-        if i == 5:
-            logger.info("Something happened for iteration 5.")
-    logger.success("Features generation complete.")
-    # -----------------------------------------
-
-
-if __name__ == "__main__":
-    app()
+        self.preprocessor = ColumnTransformer(
+            transformers=[
+                ("num", StandardScaler(), num_cols),
+                ("cat", OneHotEncoder(handle_unknown="ignore"), cat_cols),
+            ],
+            remainder="drop",
+        )
+        return self.preprocessor

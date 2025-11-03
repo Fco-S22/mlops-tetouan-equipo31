@@ -1,0 +1,10 @@
+artifact_location: file:///Users/franciscosaavedra/Documents/Proyectos_MLOps/mlops-tetouan-equipo31/mlruns/376973348358816173/models/m-b97a7848c0934da9821a42b320d23545/artifacts
+creation_timestamp: 1762134815939
+experiment_id: '376973348358816173'
+last_updated_timestamp: 1762134859582
+model_id: m-b97a7848c0934da9821a42b320d23545
+model_type: ''
+name: model
+source_run_id: 4e9b4bedacdb4776aeb145aae653bf09
+status: 2
+status_message: null
