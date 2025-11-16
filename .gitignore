@@ -195,3 +195,34 @@ cython_debug/
 
 # PyPI configuration file
 .pypirc
+
+########################################
+# IGNORAR MLRUNS Y ARTIFACTS DE MLFLOW
+########################################
+
+# MLflow experiment runs
+mlruns/
+
+# DVC artifacts
+artifacts/
+
+########################################
+# IGNORAR MODELOS Y ARCHIVOS DE OUTPUT
+########################################
+
+# Cached or generated models
+models/
+
+# LOG files
+*.log
+
+########################################
+# IGNORAR ARCHIVOS TEMPORALES
+########################################
+
+# Python cache
+__pycache__/
+*.pyc
+
+# VSCode
+.vscode/
