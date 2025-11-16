@@ -1,0 +1,9 @@
+stages:
+  prepare_data:
+    cmd: python mlops_consumo_energia_tetouan/scripts/prepare_data.py
+    deps:
+      - data/raw/power_tetouan_city_modified.csv
+      - mlops_consumo_energia_tetouan/dataset.py
+      - mlops_consumo_energia_tetouan/scripts/prepare_data.py
+    outs:
+      - data/processed/power_tetouan_city_after_EDA.csv

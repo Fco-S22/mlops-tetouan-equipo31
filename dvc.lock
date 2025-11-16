@@ -1,0 +1,22 @@
+schema: '2.0'
+stages:
+  prepare_data:
+    cmd: python mlops_consumo_energia_tetouan/scripts/prepare_data.py
+    deps:
+    - path: data/raw/power_tetouan_city_modified.csv
+      hash: md5
+      md5: b86ef39f691bde959e50ca714aa1bcb5
+      size: 4510965
+    - path: mlops_consumo_energia_tetouan/dataset.py
+      hash: md5
+      md5: cc9c9dedcd8cc0291dc3830099d8c221
+      size: 4205
+    - path: mlops_consumo_energia_tetouan/scripts/prepare_data.py
+      hash: md5
+      md5: d117d6e0d917feae2aa38bfe7b385781
+      size: 192
+    outs:
+    - path: data/processed/power_tetouan_city_after_EDA.csv
+      hash: md5
+      md5: 920edf5636e6c20f54b6e4116133678f
+      size: 3810732
