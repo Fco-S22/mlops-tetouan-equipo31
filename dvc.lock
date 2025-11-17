@@ -9,8 +9,8 @@ stages:
       size: 4510965
     - path: mlops_consumo_energia_tetouan/dataset.py
       hash: md5
-      md5: cc9c9dedcd8cc0291dc3830099d8c221
-      size: 4205
+      md5: 98d7cdbf0f4b48aac30cd76b923f1bd1
+      size: 6069
     - path: mlops_consumo_energia_tetouan/scripts/prepare_data.py
       hash: md5
       md5: d117d6e0d917feae2aa38bfe7b385781
@@ -18,5 +18,5 @@ stages:
     outs:
     - path: data/processed/power_tetouan_city_after_EDA.csv
       hash: md5
-      md5: 920edf5636e6c20f54b6e4116133678f
-      size: 3810732
+      md5: 88428603a9091008d629318d9ba08f4a
+      size: 4308923

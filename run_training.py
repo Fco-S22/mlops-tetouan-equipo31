@@ -1,6 +1,8 @@
 # run_training.py
 
 import os
+from typing import Dict
+
 import numpy as np
 import pandas as pd
 import matplotlib.pyplot as plt
@@ -27,7 +29,7 @@ TARGET_COL = "total_power"
 REGISTERED_MODEL_NAME = "ConsumoEnergia_Tetouan"
 
 
-def _safe_git_commit():
+def _safe_git_commit() -> str:
     """Obtiene el SHA corto del commit actual para registrarlo como tag (si hay Git)."""
     try:
         return os.popen("git rev-parse --short HEAD").read().strip()
@@ -35,16 +37,18 @@ def _safe_git_commit():
         return ""
 
 
-def _compute_metrics(y_true, y_pred):
+def _compute_metrics(y_true, y_pred) -> Dict[str, float]:
     mae = mean_absolute_error(y_true, y_pred)
-    rmse = np.sqrt(mean_squared_error(y_true, y_pred))
+    rmse = float(np.sqrt(mean_squared_error(y_true, y_pred)))
     r2 = r2_score(y_true, y_pred)
-    return {"mae": float(mae), "rmse": float(rmse), "r2": float(r2)}
+    return {"mae": float(mae), "rmse": rmse, "r2": float(r2)}
 
 
-def main():
+def main() -> None:
     # --- Carga y preparación de datos ---
     df = DataLoader(CSV_PATH).load()
+
+    # Feature engineering: split + preprocesador automático
     fe = FeatureEngineer(target_col=TARGET_COL)
     X_train, X_test, y_train, y_test = fe.split(df)
     pre = fe.build_preprocessor(X_train)
@@ -61,7 +65,10 @@ def main():
         "linear_regression_v1": LinearRegression(),
         "ridge_regression_v1": Ridge(alpha=1.0),
         "random_forest_v1": RandomForestRegressor(
-            n_estimators=200, max_depth=None, random_state=42, n_jobs=-1
+            n_estimators=200,
+            max_depth=None,
+            random_state=42,
+            n_jobs=-1,
         ),
     }
 
@@ -70,10 +77,12 @@ def main():
     for run_name, estimator in models.items():
         with mlflow.start_run(run_name=run_name):
             # Pipeline: preprocesamiento + modelo
-            pipeline = Pipeline(steps=[
-                ("preprocessor", pre),
-                ("model", estimator)
-            ])
+            pipeline = Pipeline(
+                steps=[
+                    ("preprocessor", pre),
+                    ("model", estimator),
+                ]
+            )
 
             # Entrenamiento
             pipeline.fit(X_train, y_train)
@@ -84,19 +93,23 @@ def main():
 
             # --- Log de parámetros, métricas y metadatos ---
             est_params = {f"model__{k}": v for k, v in estimator.get_params().items()}
-            mlflow.log_params({
-                "model": estimator.__class__.__name__,
-                "target": TARGET_COL,
-                "test_size": fe.test_size,
-                "random_state": fe.random_state,
-                **est_params
-            })
+            mlflow.log_params(
+                {
+                    "model": estimator.__class__.__name__,
+                    "target": TARGET_COL,
+                    "test_size": fe.test_size,
+                    "random_state": fe.random_state,
+                    **est_params,
+                }
+            )
             mlflow.log_metrics(metrics)
 
-            mlflow.set_tags({
-                "git_commit": _safe_git_commit(),
-                "pipeline": "preprocessor + model",
-            })
+            mlflow.set_tags(
+                {
+                    "git_commit": _safe_git_commit(),
+                    "pipeline": "preprocessor + model",
+                }
+            )
 
             # === Resultados relevantes (artefactos) ===
             # 1) Predicciones vs reales
@@ -122,16 +135,20 @@ def main():
             # 3) Importancias de características (si aplica)
             try:
                 if hasattr(estimator, "feature_importances_"):
-                    # Intentamos obtener nombres de features desde el preprocesador
                     try:
                         feature_names = pre.get_feature_names_out()
                     except Exception:
-                        feature_names = [f"f{i}" for i in range(len(estimator.feature_importances_))]
+                        feature_names = [
+                            f"f{i}"
+                            for i in range(len(estimator.feature_importances_))
+                        ]
 
-                    imp_df = pd.DataFrame({
-                        "feature": feature_names,
-                        "importance": estimator.feature_importances_
-                    })
+                    imp_df = pd.DataFrame(
+                        {
+                            "feature": feature_names,
+                            "importance": estimator.feature_importances_,
+                        }
+                    )
                     imp_path = f"artifacts/{run_name}_importancias.csv"
                     imp_df.to_csv(imp_path, index=False)
                     mlflow.log_artifact(imp_path, artifact_path="analysis")
@@ -144,10 +161,15 @@ def main():
                     try:
                         feature_names = pre.get_feature_names_out()
                     except Exception:
-                        feature_names = [f"f{i}" for i in range(np.ravel(estimator.coef_).shape[0])]
+                        feature_names = [
+                            f"f{i}"
+                            for i in range(np.ravel(estimator.coef_).shape[0])
+                        ]
 
                     coefs = np.ravel(estimator.coef_)
-                    coef_df = pd.DataFrame({"feature": feature_names, "coef": coefs})
+                    coef_df = pd.DataFrame(
+                        {"feature": feature_names, "coef": coefs}
+                    )
                     coef_path = f"artifacts/{run_name}_coeficientes.csv"
                     coef_df.to_csv(coef_path, index=False)
                     mlflow.log_artifact(coef_path, artifact_path="analysis")
@@ -161,19 +183,17 @@ def main():
             except Exception:
                 input_example = None
 
-            # Nota: algunas versiones de MLflow avisan que 'artifact_path' está deprecado.
-            # Si te aparece el warning, puedes cambiar 'artifact_path' por 'name'.
             mlflow.sklearn.log_model(
                 sk_model=pipeline,
                 artifact_path="model",
                 registered_model_name=REGISTERED_MODEL_NAME,
-                input_example=input_example
+                input_example=input_example,
             )
 
             print(f"[OK] {run_name} registrado. Métricas: {metrics}")
 
     print("\n[OK] Todos los modelos ejecutados y versionados en el Model Registry:")
-    print(f"    - {REGISTERED_MODEL_NAME} v1/v2/v3 (según orden de registro).")
+    print(f"    - {REGISTERED_MODEL_NAME} (varias versiones según el orden de registro).")
 
 
 if __name__ == "__main__":

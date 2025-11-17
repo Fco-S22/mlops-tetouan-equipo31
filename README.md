@@ -59,3 +59,15 @@ Proyecto Fase 2 - Seguimiento de Experimentos y Model Registry
 
 --------
 
+##  Ejecución de pruebas (pytest)
+
+El proyecto incluye pruebas unitarias y de integración que validan:
+
+- Carga de datos (`DataLoader`)
+- Preprocesamiento (`FeatureEngineer`)
+- Pipeline completo de entrenamiento y métricas
+
+Para ejecutar todas las pruebas:
+
+```bash
+python -m pytest -q
